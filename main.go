@@ -58,8 +58,8 @@ var ItemCosts = map[string]float64{
 
 func main() {
 	// Command line flags
-	productFlag := flag.String("product file", "products.csv", "file containing a list of products")
-	discountFlag := flag.String("discount file", "discounts.csv", "file containing a list of discounted products")
+	productFlag := flag.String("product file", "files/products.csv", "file containing a list of products")
+	discountFlag := flag.String("discount file", "files/discounts.csv", "file containing a list of discounted products")
 	flag.Parse()
 
 	// Open each file
