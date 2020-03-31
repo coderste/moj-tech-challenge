@@ -1,14 +1,19 @@
 package main
 
 import (
+	"encoding/csv"
+	"flag"
 	"fmt"
+	"io"
 	"math"
+	"os"
+	"strconv"
 )
 
 // Challenge: Implement a checkout so that it will scan items in and calculate total
 // prices correctly for any combination of products and offers above
 
-// Shopping Items:
+// Shopping Products:
 // Code | Name         | Price
 // FR1  | Fruit Tea    | £3.11
 // SR1  | Strawberries | £5.00
@@ -23,31 +28,28 @@ import (
 //
 // Because the CEO and COO may change their minds the pricing scheme has to be flexible
 
-type Items []Item
+type Products []Product
 
-type Item struct {
+type Discounts []Discount
+
+type Discount struct {
+	Code        string
+	Price       float64
+	BuyOneFree  bool
+	ApplyAt     int
+	Description string
+}
+
+type Product struct {
 	Code  string
 	Name  string
 	Price float64
 }
 
-var BaseItems = Items{
-	{
-		Code:  "FR1",
-		Name:  "Fruit Tea",
-		Price: 3.11,
-	},
-	{
-		Code:  "SR1",
-		Name:  "Strawberries",
-		Price: 5.00,
-	},
-	{
-		Code:  "CF1",
-		Name:  "Coffee",
-		Price: 11.23,
-	},
+type Basket struct {
+	Codes []string
 }
+
 var ItemCosts = map[string]float64{
 	"FR1": 3.11,
 	"SR1": 5.00,
@@ -55,25 +57,160 @@ var ItemCosts = map[string]float64{
 }
 
 func main() {
-	price := ScanItems(BaseItems)
-	fmt.Println(price)
+	// Command line flags
+	productFlag := flag.String("product file", "products.csv", "file containing a list of products")
+	discountFlag := flag.String("discount file", "discounts.csv", "file containing a list of discounted products")
+	flag.Parse()
+
+	// Open each file
+	productsFile, productsFileErr := os.Open(*productFlag)
+	if productsFileErr != nil {
+		panic(productsFileErr)
+	}
+	defer productsFile.Close()
+
+	discountsFile, discountsFileErr := os.Open(*discountFlag)
+	if discountsFileErr != nil {
+		panic(discountsFileErr)
+	}
+	defer discountsFile.Close()
+
+	// CSV Files for products and discounts
+	csvProducts := csv.NewReader(productsFile)
+	csvDiscounts := csv.NewReader(discountsFile)
+
+	products := loadProducts(csvProducts)
+	discounts := loadDiscounts(csvDiscounts)
+
+	printMessages(products, discounts)
+	basket := userInput(products, discounts)
+
+	cost := ScanItems(basket, products)
+	fmt.Printf("Your total basket cost is: £%.2f\n", cost)
+}
+
+func userInput(products Products, discounts Discounts) Basket {
+	var basket Basket
+	for _, product := range products {
+		var response int
+
+		fmt.Printf("How many %v would you like to buy? ", product.Name)
+		fmt.Scanln(&response)
+
+		for i := 1; i <= response; i++ {
+			basket.Codes = append(basket.Codes, product.Code)
+		}
+	}
+
+	return basket
+}
+
+func printMessages(products Products, discounts Discounts) {
+	welcomeMessage :=
+		`
+|--------------------------------|
+|            Hi there            |
+|           Welcome to           |
+|     The Local Shopping Mall    |
+|--------------------------------|
+		`
+	fmt.Println(welcomeMessage)
+
+	currentProducts :=
+		`
+===============================
+=       Here is a list of     =
+=      our current products   =
+===============================
+		`
+	fmt.Println(currentProducts)
+	for _, product := range products {
+		fmt.Printf("Product: %v \n", product.Name)
+		fmt.Printf("Price: £%.2f \n\n", product.Price)
+	}
+
+	currentDiscounts :=
+		`
+===============================
+=       Here is a list of     =
+=     our current discounts   =
+===============================
+		`
+	fmt.Println(currentDiscounts)
+	for _, discount := range discounts {
+		product := findProduct(products, discount.Code)
+		fmt.Printf("%v Discount offer: %v \n\n", product.Name, discount.Description)
+	}
+}
+
+// findProduct will take a list of products in and a product code
+// and return that single item product
+func findProduct(products Products, code string) Product {
+	for _, product := range products {
+		if product.Code == code {
+			return product
+		}
+	}
+
+	return Product{}
+}
+
+func loadProducts(file *csv.Reader) Products {
+	var products Products
+	for {
+		var product Product
+		record, err := file.Read()
+		if err == io.EOF {
+			break
+		}
+
+		product.Code = record[0]
+		product.Name = record[1]
+		product.Price, _ = strconv.ParseFloat(record[2], 64)
+
+		products = append(products, product)
+	}
+
+	return products
+}
+
+func loadDiscounts(file *csv.Reader) Discounts {
+	var discounts Discounts
+	for {
+		var discount Discount
+		record, err := file.Read()
+		if err == io.EOF {
+			break
+		}
+
+		discount.Code = record[0]
+		discount.Price, _ = strconv.ParseFloat(record[1], 64)
+		discount.BuyOneFree, _ = strconv.ParseBool(record[2])
+		discount.ApplyAt, _ = strconv.Atoi(record[3])
+		discount.Description = record[4]
+
+		discounts = append(discounts, discount)
+	}
+
+	return discounts
 }
 
 // ScanItems takes in a list of items and will loop through
 // each item and add the item price to a total cost
-func ScanItems(items Items) float64 {
+func ScanItems(basket Basket, products Products) float64 {
 	var totalCost float64
 	var fruitTeaCount int
 	var strawberryCount int
 
-	for _, item := range items {
-		totalCost += item.Price
+	for _, code := range basket.Codes {
+		product := findProduct(products, code)
+		totalCost += product.Price
 
-		if item.Code == "FR1" {
+		if product.Code == "FR1" {
 			fruitTeaCount++
 		}
 
-		if item.Code == "SR1" {
+		if product.Code == "SR1" {
 			strawberryCount++
 		}
 	}
