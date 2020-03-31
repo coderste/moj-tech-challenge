@@ -1,2 +1,2 @@
-FR1,3.11,yes,0,Buy one get one free
-SR1,0.50,no,3,Buy 3 or more for a reduced price of £4.50
+FR1,3.11,true,0,Buy one get one free
+SR1,0.50,false,3,Buy 3 or more for a reduced price of £4.50

@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"math"
 	"os"
 	"strconv"
 )
@@ -41,19 +40,14 @@ type Discount struct {
 }
 
 type Product struct {
-	Code  string
-	Name  string
-	Price float64
+	Code        string
+	Name        string
+	Price       float64
+	HasDiscount bool
 }
 
 type Basket struct {
 	Codes []string
-}
-
-var ItemCosts = map[string]float64{
-	"FR1": 3.11,
-	"SR1": 5.00,
-	"CF1": 11.23,
 }
 
 func main() {
@@ -82,11 +76,26 @@ func main() {
 	products := loadProducts(csvProducts)
 	discounts := loadDiscounts(csvDiscounts)
 
+	// check if a product has a discount
+	products = checkDiscount(products, discounts)
+
 	printMessages(products, discounts)
 	basket := userInput(products, discounts)
 
-	cost := ScanItems(basket, products, discounts)
+	cost := BasketCost(basket, products, discounts)
 	fmt.Printf("Your total basket cost is: £%.2f\n", cost)
+}
+
+func checkDiscount(products Products, discounts Discounts) Products {
+	for _, discount := range discounts {
+		for i, product := range products {
+			if product.Code == discount.Code {
+				products[i].HasDiscount = true
+			}
+		}
+	}
+
+	return products
 }
 
 func userInput(products Products, discounts Discounts) Basket {
@@ -155,6 +164,16 @@ func findProduct(products Products, code string) Product {
 	return Product{}
 }
 
+func findDiscount(discounts Discounts, code string) Discount {
+	for _, discount := range discounts {
+		if discount.Code == code {
+			return discount
+		}
+	}
+
+	return Discount{}
+}
+
 func loadProducts(file *csv.Reader) Products {
 	var products Products
 	for {
@@ -195,56 +214,63 @@ func loadDiscounts(file *csv.Reader) Discounts {
 	return discounts
 }
 
-// ScanItems takes in a list of items and will loop through
+// BasketCost takes in a list of items and will loop through
 // each item and add the item price to a total cost
-func ScanItems(basket Basket, products Products, discounts Discounts) float64 {
+func BasketCost(basket Basket, products Products, discounts Discounts) float64 {
 	var totalCost float64
-	var fruitTeaCount int
-	var strawberryCount int
+	var savingCost float64
 
-	for _, code := range basket.Codes {
-		product := findProduct(products, code)
+	for _, item := range basket.Codes {
+		product := findProduct(products, item)
 		totalCost += product.Price
+	}
 
-		if product.Code == "FR1" {
-			fruitTeaCount++
+	// discount values
+	for _, product := range products {
+		if contains(basket, product) {
+			if product.HasDiscount {
+				discount := findDiscount(discounts, product.Code)
+				itemCount := itemCount(basket, product.Code)
+
+				if discount.BuyOneFree {
+					if isEven(itemCount) {
+						offer := itemCount / 2
+						savingCost += product.Price * float64(offer)
+					} else if !isEven(itemCount) && itemCount >= 3 {
+						offer := (itemCount - 1) / 2
+						savingCost += product.Price * float64(offer)
+					}
+				} else {
+					if itemCount >= discount.ApplyAt {
+						savingCost += discount.Price * float64(itemCount)
+					}
+				}
+			}
 		}
+	}
 
-		if product.Code == "SR1" {
-			strawberryCount++
+	return totalCost - savingCost
+}
+
+func itemCount(basket Basket, code string) int {
+	var counter int
+	for _, item := range basket.Codes {
+		if item == code {
+			counter++
 		}
 	}
 
-	// round the value down to 2 decimal places
-	totalCost = math.Floor(totalCost*100) / 100
+	return counter
+}
 
-	if isEven(fruitTeaCount) {
-		// 6 fruit teas mean 3 are free so
-		// the calculation would look something like
-		// 6/2 = 3 totalCost - (ItemCosts * 3 = 9.33)
-		fruitTeaCountOffer := fruitTeaCount / 2
-		discount := ItemCosts["FR1"] * float64(fruitTeaCountOffer)
-
-		totalCost = totalCost - discount
-	} else if !isEven(fruitTeaCount) && fruitTeaCount >= 3 {
-		// 3 fruit teas mean 1 is free
-		// so we pay for 2 and get 1 free in this case
-		// calculation:
-		// 3 - 1 = 2 / 2 = 1 = totalCost - (ItemCosts * 1) + 1
-		// 3.11 + 3.11 - 3.11 = 6.22
-		fruitTeaCountOffer := (fruitTeaCount - 1) / 2
-		discount := ItemCosts["FR1"] * float64(fruitTeaCountOffer)
-
-		totalCost = totalCost - discount
+func contains(basket Basket, product Product) bool {
+	for _, item := range basket.Codes {
+		if item == product.Code {
+			return true
+		}
 	}
 
-	if strawberryCount >= 3 {
-		discount := 0.5 * float64(strawberryCount)
-
-		totalCost = totalCost - discount
-	}
-
-	return totalCost
+	return false
 }
 
 func isEven(number int) bool {
