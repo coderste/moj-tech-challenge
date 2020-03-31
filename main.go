@@ -58,8 +58,8 @@ var ItemCosts = map[string]float64{
 
 func main() {
 	// Command line flags
-	productFlag := flag.String("product file", "files/products.csv", "file containing a list of products")
-	discountFlag := flag.String("discount file", "files/discounts.csv", "file containing a list of discounted products")
+	productFlag := flag.String("products", "files/products.csv", "location of the product list")
+	discountFlag := flag.String("discounts", "files/discounts.csv", "location of the discount list")
 	flag.Parse()
 
 	// Open each file
@@ -85,7 +85,7 @@ func main() {
 	printMessages(products, discounts)
 	basket := userInput(products, discounts)
 
-	cost := ScanItems(basket, products)
+	cost := ScanItems(basket, products, discounts)
 	fmt.Printf("Your total basket cost is: £%.2f\n", cost)
 }
 
@@ -197,7 +197,7 @@ func loadDiscounts(file *csv.Reader) Discounts {
 
 // ScanItems takes in a list of items and will loop through
 // each item and add the item price to a total cost
-func ScanItems(basket Basket, products Products) float64 {
+func ScanItems(basket Basket, products Products, discounts Discounts) float64 {
 	var totalCost float64
 	var fruitTeaCount int
 	var strawberryCount int
