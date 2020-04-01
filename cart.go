@@ -45,10 +45,17 @@ func BasketCost(basket Basket, products Products, discounts Discounts) float64 {
 		product := findProduct(products, code)
 		totalCost += product.Price * float64(quantity)
 
+		// Check if the product has a discount to apply
 		if product.HasDiscount {
 			discount := findDiscount(discounts, product.Code)
 
+			// If the product is a buy one get one free discount?
 			if discount.BuyOneFree {
+				// If there is an even amount of products then the calculation is easy
+				// we just cut the amount of items in half and then times that by
+				// the product price. If there is an odd number of items that
+				// is equal to 3 or more then we need to take one out of the quantity
+				// and then cut that quantity in half to get the saving cost
 				if isEven(quantity) {
 					offerSaving := quantity / 2
 					savingCost += product.Price * float64(offerSaving)
@@ -57,6 +64,9 @@ func BasketCost(basket Basket, products Products, discounts Discounts) float64 {
 					savingCost += product.Price * float64(offerSaving)
 				}
 			} else {
+				// If the product isn't a buy one get one free
+				// that means it's a bulk discount and all we do for that
+				// is times the discount price by the amount of products for that discount
 				if quantity >= discount.ApplyAt {
 					savingCost += discount.Price * float64(quantity)
 				}
