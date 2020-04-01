@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// Basket
+// Basket is a representation of a user's checkout items
 type Basket struct {
 	Codes []string
 }
