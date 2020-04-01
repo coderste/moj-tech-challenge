@@ -33,10 +33,10 @@ func TestBasketCost(t *testing.T) {
 				},
 			},
 			basket: moj.Basket{
-				Codes: []string{
-					"FR1",
-					"SR1",
-					"CF1",
+				ItemCount: map[string]int{
+					"FR1": 1,
+					"SR1": 1,
+					"CF1": 1,
 				},
 			},
 			products: moj.Products{
@@ -80,11 +80,10 @@ func TestBasketCost(t *testing.T) {
 				},
 			},
 			basket: moj.Basket{
-				Codes: []string{
-					"FR1",
-					"FR1",
-					"SR1",
-					"CF1",
+				ItemCount: map[string]int{
+					"FR1": 2,
+					"SR1": 1,
+					"CF1": 1,
 				},
 			},
 			products: moj.Products{
@@ -128,13 +127,10 @@ func TestBasketCost(t *testing.T) {
 				},
 			},
 			basket: moj.Basket{
-				Codes: []string{
-					"FR1",
-					"SR1",
-					"SR1",
-					"SR1",
-					"SR1",
-					"CF1",
+				ItemCount: map[string]int{
+					"FR1": 1,
+					"SR1": 4,
+					"CF1": 1,
 				},
 			},
 			products: moj.Products{
@@ -178,15 +174,10 @@ func TestBasketCost(t *testing.T) {
 				},
 			},
 			basket: moj.Basket{
-				Codes: []string{
-					"FR1",
-					"FR1",
-					"FR1",
-					"SR1",
-					"SR1",
-					"SR1",
-					"SR1",
-					"CF1",
+				ItemCount: map[string]int{
+					"FR1": 3,
+					"SR1": 4,
+					"CF1": 1,
 				},
 			},
 			products: moj.Products{
