@@ -3,11 +3,13 @@ package moj
 import (
 	"errors"
 	"fmt"
+	"strconv"
 )
 
 var (
 	tooManyItems   = errors.New("You have selected too many items. A maximum of 100 items allowed per product")
 	notEnoughItems = errors.New("Negative item amounts are not allowed. Please select a number of 0 or greater")
+	expectedInt    = errors.New("Expected integer")
 )
 
 // UserInput will watch the console for the users input and based on how many
@@ -17,17 +19,21 @@ func UserInput(products Products) Basket {
 	basket.ItemCount = make(map[string]int)
 
 	for _, product := range products {
-		var response int
+		var response string
+		var amount int
 
 		for {
 			fmt.Printf("How many %v would you like to buy? ", product.Name)
-			_, err := fmt.Scan(&response)
+			fmt.Scanln(&response)
+
+			num, err := strconv.Atoi(response)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Println(expectedInt)
 				continue
 			}
 
-			if ok, err := validResponse(response); ok {
+			if ok, err := validResponse(num); ok && err == nil {
+				amount = num
 				break
 			} else {
 				fmt.Println(err)
@@ -35,7 +41,7 @@ func UserInput(products Products) Basket {
 			}
 		}
 
-		basket.ItemCount[product.Code] = response
+		basket.ItemCount[product.Code] = amount
 	}
 
 	return basket
