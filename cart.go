@@ -10,6 +10,7 @@ type Basket struct {
 	Codes []string
 }
 
+// CartCLI will initiate the command line interface of the application
 func CartCLI() {
 	// Setting up application flags
 	productFlag := flag.String("products", "files/products.csv", "location of the product list")
