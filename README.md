@@ -19,6 +19,11 @@ If a product is buy one get one free then the discount applies as soon as you ha
 
 To run the app you can just run the binary in your console. In the root of the project just do `./shopping-mall`. 
 
+Or if you have [Go](https://golang.org) installed you go use the standard Go commands like `run` or `build`
+```
+go run ./cmd/cli/main.go --products=./files/products.csv --discounts=./files/discounts.csv
+```
+
 We have 2 flags to customise the location of where the `products.csv` file and the `discounts.csv` file found the defaults are listed below.
 ```
 Usage of ./shopping-mall:
