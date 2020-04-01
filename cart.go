@@ -71,14 +71,3 @@ func BasketCost(basket Basket, products Products, discounts Discounts) float64 {
 func isEven(number int) bool {
 	return number%2 == 0
 }
-
-// contains will check the user's basket contains a product's code
-func contains(basket Basket, product Product) bool {
-	for _, item := range basket.Codes {
-		if item == product.Code {
-			return true
-		}
-	}
-
-	return false
-}

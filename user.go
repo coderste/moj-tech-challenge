@@ -14,6 +14,8 @@ var (
 // items they select for each product will be enter
 func UserInput(products Products) Basket {
 	var basket Basket
+	basket.ItemCount = make(map[string]int)
+
 	for _, product := range products {
 		var response int
 
@@ -36,7 +38,6 @@ func UserInput(products Products) Basket {
 		basket.ItemCount[product.Code] = response
 	}
 
-	fmt.Println(basket)
 	return basket
 }
 
