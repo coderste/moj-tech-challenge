@@ -1,18 +1,22 @@
-package main
+package moj_test
 
-import "testing"
+import (
+	"testing"
 
-func TestScanItems(t *testing.T) {
+	"github.com/moretonb/moj-coderste-tech-challenge"
+)
+
+func TestBasketCost(t *testing.T) {
 	testCases := []struct {
 		name      string
-		discounts Discounts
-		basket    Basket
-		products  Products
+		discounts moj.Discounts
+		basket    moj.Basket
+		products  moj.Products
 		expected  float64
 	}{
 		{
 			name: "1. returns the correct price for 3 normal items",
-			discounts: Discounts{
+			discounts: moj.Discounts{
 				{
 					Code:        "FR1",
 					Price:       3.11,
@@ -28,14 +32,14 @@ func TestScanItems(t *testing.T) {
 					Description: "Buy 3 or more for a reduced price of £4.50",
 				},
 			},
-			basket: Basket{
+			basket: moj.Basket{
 				Codes: []string{
 					"FR1",
 					"SR1",
 					"CF1",
 				},
 			},
-			products: Products{
+			products: moj.Products{
 				{
 					Code:        "FR1",
 					Name:        "Fruit Tea",
@@ -59,7 +63,7 @@ func TestScanItems(t *testing.T) {
 		},
 		{
 			name: "2. returns the correct price for 4 items with the 2 fruit tea discount offer",
-			discounts: Discounts{
+			discounts: moj.Discounts{
 				{
 					Code:        "FR1",
 					Price:       3.11,
@@ -75,7 +79,7 @@ func TestScanItems(t *testing.T) {
 					Description: "Buy 3 or more for a reduced price of £4.50",
 				},
 			},
-			basket: Basket{
+			basket: moj.Basket{
 				Codes: []string{
 					"FR1",
 					"FR1",
@@ -83,7 +87,7 @@ func TestScanItems(t *testing.T) {
 					"CF1",
 				},
 			},
-			products: Products{
+			products: moj.Products{
 				{
 					Code:        "FR1",
 					Name:        "Fruit Tea",
@@ -107,7 +111,7 @@ func TestScanItems(t *testing.T) {
 		},
 		{
 			name: "3. returns the correct price for 6 items where strawberries are brought in bulk (3 or more)",
-			discounts: Discounts{
+			discounts: moj.Discounts{
 				{
 					Code:        "FR1",
 					Price:       3.11,
@@ -123,7 +127,7 @@ func TestScanItems(t *testing.T) {
 					Description: "Buy 3 or more for a reduced price of £4.50",
 				},
 			},
-			basket: Basket{
+			basket: moj.Basket{
 				Codes: []string{
 					"FR1",
 					"SR1",
@@ -133,7 +137,7 @@ func TestScanItems(t *testing.T) {
 					"CF1",
 				},
 			},
-			products: Products{
+			products: moj.Products{
 				{
 					Code:        "FR1",
 					Name:        "Fruit Tea",
@@ -157,7 +161,7 @@ func TestScanItems(t *testing.T) {
 		},
 		{
 			name: "4. returns the correct price for 8 items where strawberries are brought in bulk (3 or more) and fruit tea is an odd amount",
-			discounts: Discounts{
+			discounts: moj.Discounts{
 				{
 					Code:        "FR1",
 					Price:       3.11,
@@ -173,7 +177,7 @@ func TestScanItems(t *testing.T) {
 					Description: "Buy 3 or more for a reduced price of £4.50",
 				},
 			},
-			basket: Basket{
+			basket: moj.Basket{
 				Codes: []string{
 					"FR1",
 					"FR1",
@@ -185,7 +189,7 @@ func TestScanItems(t *testing.T) {
 					"CF1",
 				},
 			},
-			products: Products{
+			products: moj.Products{
 				{
 					Code:        "FR1",
 					Name:        "Fruit Tea",
@@ -211,10 +215,10 @@ func TestScanItems(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := BasketCost(tc.basket, tc.products, tc.discounts)
+			got := moj.BasketCost(tc.basket, tc.products, tc.discounts)
 
 			if got != tc.expected {
-				t.Errorf("ScanItems(%v, %v) == %v, want %v", tc.basket, tc.products, got, tc.expected)
+				t.Errorf("BasketCost(%v, %v) == %v, want %v", tc.basket, tc.products, got, tc.expected)
 			}
 		})
 	}
