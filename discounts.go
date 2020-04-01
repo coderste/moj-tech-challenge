@@ -39,6 +39,8 @@ func LoadDiscounts(flag *string) Discounts {
 
 		// Build a discount from the records stored
 		// in the CSV
+		// NB: we disregard the errors here because it's a small application
+		// and we don't have any logging or error handling in place
 		discount.Code = record[0]
 		discount.Price, _ = strconv.ParseFloat(record[1], 64)
 		discount.BuyOneFree, _ = strconv.ParseBool(record[2])
